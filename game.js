@@ -230,6 +230,7 @@ function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
+    overlay.classList.add('hidden');
     lastTime = performance.now();
     loop(lastTime);
   } else {
@@ -241,6 +242,7 @@ function togglePause() {
 }
 
 function loop(ts) {
+  if (gameOver || paused) return;
   const dt = ts - lastTime;
   lastTime = ts;
   dropAccum += dt;
@@ -252,6 +254,9 @@ function loop(ts) {
       lockPiece();
     }
   }
+  // endGame() pudo ejecutarse dentro de lockPiece(): su cancelAnimationFrame no
+  // afecta al frame en curso, así que hay que cortar aquí para no re-agendar el bucle.
+  if (gameOver) return;
   draw();
   animId = requestAnimationFrame(loop);
 }
